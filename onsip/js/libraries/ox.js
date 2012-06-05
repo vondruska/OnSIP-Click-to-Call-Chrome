@@ -1,3 +1,5 @@
+/* Start ----------------------------------------------------- ox.js*/
+
 /**
  * @namespace
  */
@@ -1461,7 +1463,7 @@ OX.Services.Auth = OX.Base.extend(OX.Mixins.EntityTime, /** @lends OX.Services.A
     var callbacks = {};
     if (arguments.length > 0 &&
         arguments[arguments.length - 1] &&
-        (arguments[arguments.length - 1].onSucess || arguments[arguments.length - 1].onError)) {
+        (arguments[arguments.length - 1].onSuccess || arguments[arguments.length - 1].onError)) {
       callbacks = arguments[arguments.length - 1];
 
       if (authForAll === callbacks) {
@@ -1546,6 +1548,12 @@ OX.Services.ActiveCalls = OX.Base.extend(OX.Mixins.Subscribable, /** @lends OX.S
 
     /** The tag for the terminating leg of the call. */
     toTag: null,
+
+    /** Caller ID information for the caller */
+    fromDisplay: null,
+
+    /** Caller ID information for the callee */
+    toDisplay: null,
 
     /** The branch tag for this pre-dialog event. */
     branch: null,
@@ -1648,6 +1656,12 @@ OX.Services.ActiveCalls = OX.Base.extend(OX.Mixins.Subscribable, /** @lends OX.S
         break;
       case 'call-setup-id':
         attrs.callSetupID = node.firstChild && node.firstChild.nodeValue;
+        break;
+      case 'from-display':
+        attrs.fromDisplay = node.firstChild && node.firstChild.nodeValue;
+        break;
+      case 'to-display':
+        attrs.toDisplay = node.firstChild && node.firstChild.nodeValue;
         break;
       }
     }
@@ -2368,6 +2382,28 @@ OX.XML.Element = OX.Base.extend(/** @lends OX.XML.Element# */{
   },
 
   /**
+   * @function
+   * Escape XML characters to prevent parser errors.
+   *
+   * @param {String} string The string to escape.
+   * @returns {String} The escaped string.
+   */
+  escapeXML: (function () {
+    var character = {
+      '"': '&quot;',
+      "'": '&apos;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;'
+    }, re = /[<>&"']/g;
+    return function (str) {
+      return str.replace(re, function (c) {
+        return character[c];
+      });
+    };
+  }()),
+
+  /**
    * Return an XML string representation of this element.
    *
    * @returns {String} This XML element as XML text.
@@ -2387,7 +2423,7 @@ OX.XML.Element = OX.Base.extend(/** @lends OX.XML.Element# */{
           continue;
         }
 
-        attrs.push(name + '="' + val + '"');
+        attrs.push(name + '="' + this.escapeXML(val.toString()) + '"');
       }
     }
 
@@ -2401,7 +2437,7 @@ OX.XML.Element = OX.Base.extend(/** @lends OX.XML.Element# */{
     }
 
     if (this.text) {
-      ret += this.text;
+      ret += this.escapeXML(this.text.toString());
     }
 
     ret += "</" + this.name + ">";
@@ -2735,7 +2771,6 @@ OX.StropheAdapter = OX.ConnectionAdapter.extend(
         delete this._callbacks[this._callbackQueue.pop()];
       }
     }
-    node.setAttribute('xmlns', 'jabber:client');
     return this.strophe.send(node);
   },
 
@@ -2767,3 +2802,6 @@ OX.StropheAdapter = OX.ConnectionAdapter.extend(
     };
   }
 });
+
+
+/* End ------------------------------------------------------- ox.js*/
