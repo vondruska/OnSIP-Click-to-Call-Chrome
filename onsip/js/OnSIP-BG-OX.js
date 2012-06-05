@@ -3,7 +3,8 @@
 var BG_APP = {
   "notifications" : [],
   "launched_n"    : false,
-  "log_context"   : 'BG_APP'
+  "log_context"   : 'BG_APP',
+  "audio"			: null
 };
 
 BG_APP.activeCallCreated   = function ( items ) {
@@ -92,7 +93,7 @@ BG_APP.activeCallRequested = function ( items ) {
     cont_highrise = highrise_app.findContact (phone + '','');
     cont_zendesk = zendesk_app .findContact (phone + '');
     name = this._normalizeName (cont_zendesk, cont_highrise);
-    phone = name || phone;
+
     name_from_context  = '';
 
     var f_notification = {
@@ -119,6 +120,9 @@ BG_APP.activeCallRequested = function ( items ) {
 
 	if (webkitNotifications.checkPermission() == 0) {
           n.show();
+		  
+			// ensure the call is not a setup, and actually incoming
+			that._startNotificationAudio();
 	}
 
 	dbg.log(that.log_context, 'Checking if last was ticket onsip - ' +
@@ -229,6 +233,7 @@ BG_APP.activeCallConfirmed = function ( items ) {
       that._cancelNotifications(q);
     };
     setTimeout (f, 2000);
+	that._stopNotificationAudio();
   }
 };
 
@@ -247,6 +252,8 @@ BG_APP.activeCallRetract = function (itemURI) {
       that._cancelNotifications (q);
     };
     setTimeout(f, 1000);
+	
+	that._stopNotificationAudio();
   }
 };
 
@@ -312,3 +319,32 @@ BG_APP._isNotificationShowing = function (item) {
   }
   return (is_showing && (webkitNotifications.checkPermission() == 0));
 };
+
+
+BG_APP._startNotificationAudio = function() {
+	dbg.log (this.log_context, 'In start notification audio');
+	
+	if (pref.get('playSoundWhenRinging') && !this._isNotificationAudioPlaying()) {
+		myAudio = new Audio('/audio/ringing.ogg'); 
+		myAudio.addEventListener('ended', function() {
+			this.currentTime = 0;
+			this.play();
+		}, false);
+		myAudio.play();
+		
+		this.audio = myAudio;
+	}
+};
+
+BG_APP._isNotificationAudioPlaying = function() {
+	dbg.log (this.log_context, 'In is audio notification playing');
+	return this.audio != null;
+}
+
+BG_APP._stopNotificationAudio = function() {
+	dbg.log (this.log_context, 'In audio notification stop');
+	if(this._isNotificationAudioPlaying()) {
+		this.audio.pause();
+		this.audio = null;
+	}
+}

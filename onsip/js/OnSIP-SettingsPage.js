@@ -27,6 +27,9 @@ $(function(){
 	    pref.set('onsipCredentialsGood', false);
 	    pref.set('highriseEnabled'     , false);
 	    pref.set('zendeskEnabled'      , false);
+		
+		/* set the preference for the phone ringing */
+		pref.set('playSoundWhenRinging'	, $('#playsound').prop('checked'));
 
 	    /** Error flags **/
 	    var error_fields = isOnSIPDataEntered ();
@@ -389,6 +392,8 @@ function setDefaultSettings(){
   /** Initial value for OnSIP options **/
   $('#fromAddress').val(pref.get('fromAddress') );
   $('#onsipPassword').val(pref.get('onsipPassword') );
+  
+  $('#playsound').attr('checked', pref.get('playSoundWhenRinging'));
 
   /** TODO: Check which of the two plug-ins are enabled **/
   setZendeskSettings(pref);
