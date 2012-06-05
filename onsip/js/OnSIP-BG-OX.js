@@ -93,7 +93,9 @@ BG_APP.activeCallRequested = function ( items ) {
     cont_highrise = highrise_app.findContact (phone + '','');
     cont_zendesk = zendesk_app .findContact (phone + '');
     name = this._normalizeName (cont_zendesk, cont_highrise);
-
+	
+	name = name || item.fromDisplay;
+	
     name_from_context  = '';
 
     var f_notification = {
@@ -103,7 +105,7 @@ BG_APP.activeCallRequested = function ( items ) {
 	  subject  = subject.substr(0, 60).toLowerCase();
         } else {
 	  if (!is_setup) {
-            subject  = "From: "  + formatPhoneNum('' + phone);
+            subject  = name + ' (' + formatPhoneNum('' + phone) + ')';
 	  } else {
             subject  = "Setup: " + formatPhoneNum('' + phone);
 	  }
