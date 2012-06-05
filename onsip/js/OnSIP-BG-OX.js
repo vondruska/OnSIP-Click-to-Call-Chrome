@@ -105,7 +105,7 @@ BG_APP.activeCallRequested = function ( items ) {
 	  subject  = subject.substr(0, 60).toLowerCase();
         } else {
 	  if (!is_setup) {
-            subject  = name + ' (' + formatPhoneNum('' + phone) + ')';
+            subject  = name + ' [' + formatPhoneNum('' + phone) + ']';
 	  } else {
             subject  = "Setup: " + formatPhoneNum('' + phone);
 	  }
